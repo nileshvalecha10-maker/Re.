@@ -79,7 +79,7 @@
   }
   .who-card:hover { border-color: var(--border-hover); background: var(--bg-secondary); }
   .who-card.selected { border: 2px solid var(--text); }
-  .who-icon { font-size: 22px; margin-bottom: .5rem; }
+  .who-icon { width: 22px; height: 22px; margin-bottom: .6rem; display: block; opacity: .55; }
   .who-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
   .who-desc { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
 
@@ -185,27 +185,30 @@
   <h2 class="big-title">Pick the one that fits right now.</h2>
   <div class="who-grid">
     <div class="who-card" data-who="kid" onclick="pickWho(this)">
-      <div class="who-icon">🌱</div>
+      <svg class="who-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 7 7 4 3 5c0 5 3 9 9 7"/><path d="M12 12c0-5 5-8 9-7-1 5-4 9-9 7"/></svg>
       <div class="who-name">Young &amp; finding out</div>
       <div class="who-desc">Under 18, still figuring it out</div>
     </div>
     <div class="who-card" data-who="young" onclick="pickWho(this)">
-      <div class="who-icon">🔥</div>
+      <svg class="who-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
       <div class="who-name">Young adult</div>
       <div class="who-desc">18–25, building, unsure, hungry</div>
     </div>
     <div class="who-card" data-who="adult" onclick="pickWho(this)">
-      <div class="who-icon">⚡</div>
+      <svg class="who-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <div class="who-name">In the thick of it</div>
       <div class="who-desc">26–40, career, life, pressure</div>
     </div>
     <div class="who-card" data-who="mid" onclick="pickWho(this)">
-      <div class="who-icon">🕰</div>
+      <svg class="who-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
       <div class="who-name">Mid-life reckoning</div>
       <div class="who-desc">40+, wondering if it's too late</div>
     </div>
   </div>
-  <button class="primary-btn" id="who-next" disabled onclick="go('s-life')">Next →</button>
+  <div class="nav-row" style="margin-top:1.5rem">
+    <button class="back-btn" onclick="go('s-intro')">Back</button>
+    <button class="primary-btn" id="who-next" disabled onclick="go('s-life')" style="margin-left:auto">Next →</button>
+  </div>
 </div>
 
 <div id="s-life" class="screen">
@@ -231,7 +234,10 @@
     <div class="pill" data-v="surviving" onclick="tog(this,'modeV')">just surviving</div>
     <div class="pill" data-v="asleep" onclick="tog(this,'modeV')">sleepwalking</div>
   </div>
-  <button class="primary-btn" onclick="go('s-feel')">Next →</button>
+  <div class="nav-row" style="margin-top:1.5rem">
+    <button class="back-btn" onclick="go('s-who')">Back</button>
+    <button class="primary-btn" onclick="go('s-feel')" style="margin-left:auto">Next →</button>
+  </div>
 </div>
 
 <div id="s-feel" class="screen">
@@ -250,7 +256,10 @@
     <div class="feel-btn" data-v="purpose" onclick="togFeel(this)">No real purpose</div>
     <div class="feel-btn" data-v="okay" onclick="togFeel(this)">Actually okay</div>
   </div>
-  <button class="primary-btn" onclick="buildAndGo()">Open my eyes →</button>
+  <div class="nav-row" style="margin-top:1.5rem">
+    <button class="back-btn" onclick="go('s-life')">Back</button>
+    <button class="primary-btn" onclick="buildAndGo()" style="margin-left:auto">Open my eyes →</button>
+  </div>
 </div>
 
 <div id="s-questions" class="screen">
@@ -285,6 +294,7 @@
   <div class="answer-list" id="answer-list"></div>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
     <button class="ghost-btn" onclick="restartAll()">Restart</button>
+    <button class="primary-btn" style="margin-top:0" onclick="goDeeper()">Go deeper ↗</button>
   </div>
   <div class="bottom-mark">
     <div class="bottom-mark-name">Re.</div>
@@ -386,6 +396,13 @@ function buildEnd(){
     div.innerHTML='<p class="a-q">'+it.q+'</p><p class="'+(a?'a-a':'a-empty')+'">'+(a||'No answer written')+'</p>';
     list.appendChild(div);
   });
+}
+function goDeeper(){
+  const feel=S.feel[0]||'potential';
+  const answered=S.qs.map((q,i)=>S.answers[i]?q.q+' → '+S.answers[i]:null).filter(Boolean).slice(0,6).join('\n');
+  const msg='I just went through Re. (Made to Re-make minds).\nMy stage: '+S.who+'.\nFeeling underneath: '+feel+'.\n\nSome of my answers:\n'+answered+'\n\nHelp me go deeper — what does this actually reveal, and what should I do next?';
+  const encoded=encodeURIComponent(msg);
+  window.open('https://claude.ai/new?q='+encoded,'_blank');
 }
 function restartAll(){
   S.who='';S.timeV=[];S.modeV=[];S.feel=[];S.qs=[];S.qi=0;S.answers=[];
