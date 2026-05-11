@@ -234,7 +234,7 @@
     <div class="pill" data-v="care" onclick="tog(this,'timeV')">caring for others</div>
     <div class="pill" data-v="other-time" onclick="togOther(this,'timeV','other-time-input')">Other (describe)</div>
   </div>
-  <input type="text" id="other-time-input" placeholder="Describe…" oninput="S.otherTime=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;outline:none;margin-bottom:1rem;transition:border-color .15s">
+  <input type="text" id="other-time-input" placeholder="Describe…" oninput="S.otherTime=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border-hover);border-radius:var(--radius);padding:12px 14px;outline:none;margin-top:-0.5rem;margin-bottom:1rem;transition:border-color .15s;box-sizing:border-box;">
   <p class="section-label">I feel like I'm</p>
   <div class="pill-row">
     <div class="pill" data-v="drifting" onclick="tog(this,'modeV')">drifting</div>
@@ -245,7 +245,7 @@
     <div class="pill" data-v="asleep" onclick="tog(this,'modeV')">sleepwalking</div>
     <div class="pill" data-v="other-mode" onclick="togOther(this,'modeV','other-mode-input')">Other (describe)</div>
   </div>
-  <input type="text" id="other-mode-input" placeholder="Describe…" oninput="S.otherMode=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;outline:none;margin-bottom:1rem;transition:border-color .15s">
+  <input type="text" id="other-mode-input" placeholder="Describe…" oninput="S.otherMode=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border-hover);border-radius:var(--radius);padding:12px 14px;outline:none;margin-top:-0.5rem;margin-bottom:1rem;transition:border-color .15s;box-sizing:border-box;">
   <div class="nav-row" style="margin-top:1.5rem">
     <button class="back-btn" onclick="go('s-who')">Back</button>
     <button class="primary-btn" onclick="go('s-feel')" style="margin-left:auto">Next →</button>
@@ -275,7 +275,7 @@
     <div class="feel-btn" data-v="waiting" onclick="togFeel(this)">Waiting for life to start</div>
     <div class="feel-btn" data-v="other-feel" onclick="togFeel(this)">Other (describe)</div>
   </div>
-  <input type="text" id="other-feel-input" placeholder="Describe what's actually there…" oninput="S.otherFeel=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;outline:none;margin-bottom:1rem;transition:border-color .15s">
+  <input type="text" id="other-feel-input" placeholder="Describe what's actually there…" oninput="S.otherFeel=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border-hover);border-radius:var(--radius);padding:12px 14px;outline:none;margin-top:-0.5rem;margin-bottom:1rem;transition:border-color .15s;box-sizing:border-box;">
   <div class="nav-row" style="margin-top:1.5rem">
     <button class="back-btn" onclick="go('s-life')">Back</button>
     <button class="primary-btn" onclick="buildAndGo()" style="margin-left:auto">Open my eyes →</button>
@@ -354,7 +354,8 @@ function togOther(el,group,inputId){
     el.classList.add('on');
     S[group].push(v);
     input.style.display='block';
-    setTimeout(()=>input.focus(),50);
+    input.style.width='100%';
+    requestAnimationFrame(()=>input.focus());
   }
 }
 function togFeel(el){
@@ -368,7 +369,7 @@ function togFeel(el){
     if(S.feel.length>=3)return;
     el.classList.add('on');
     S.feel.push(v);
-    if(v==='other-feel'){otherInput.style.display='block';setTimeout(()=>otherInput.focus(),50);}
+    if(v==='other-feel'){otherInput.style.display='block';otherInput.style.width='100%';requestAnimationFrame(()=>otherInput.focus());}
   }
 }
 const Q={
