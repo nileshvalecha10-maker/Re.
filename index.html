@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="Re. — Made to Re-make minds. A personalised question journey that opens your eyes.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="Re.">
+<meta property="og:description" content="Made to Re-make minds.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Re. — Made to Re-make minds.</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f3;
+    --text: #0f0f0f;
+    --text-secondary: #5a5a5a;
+    --text-tertiary: #9a9a9a;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.25);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --text: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #606060;
+      --border: rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.25);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  #app { max-width: 600px; margin: 0 auto; padding: 0 1rem; }
+  .screen { display: none; flex-direction: column; padding: 2.5rem 0; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  .mark { margin-bottom: 2.5rem; }
+  .mark-name { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+  .mark-tag { font-size: 11px; color: var(--text-tertiary); letter-spacing: .04em; margin-top: 3px; }
+  .mark-tag em { font-style: normal; color: var(--text-secondary); }
+
+  .big-title { font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: .75rem; }
+  .sub { font-size: 15px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 2rem; }
+  .step-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 1.5rem; }
+  .section-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: .6rem; }
+
+  .primary-btn {
+    background: var(--text); color: var(--bg);
+    border: none; padding: 14px 32px;
+    border-radius: var(--radius); font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: opacity .15s; display: inline-block;
+  }
+  .primary-btn:hover { opacity: .82; }
+  .primary-btn:disabled { opacity: .3; cursor: default; }
+  .ghost-btn {
+    background: transparent; border: 0.5px solid var(--border-hover);
+    color: var(--text-secondary); padding: 13px 24px;
+    border-radius: var(--radius); font-size: 14px; cursor: pointer;
+  }
+  .ghost-btn:hover { background: var(--bg-secondary); }
+
+  .who-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 2rem; }
+  .who-card {
+    border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem; cursor: pointer;
+    transition: border-color .15s, background .15s; background: var(--bg);
+  }
+  .who-card:hover { border-color: var(--border-hover); background: var(--bg-secondary); }
+  .who-card.selected { border: 2px solid var(--text); }
+  .who-icon { font-size: 22px; margin-bottom: .5rem; }
+  .who-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .who-desc { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .pill {
+    border: 0.5px solid var(--border-hover); border-radius: 20px;
+    padding: 8px 16px; font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; transition: all .12s; background: var(--bg);
+  }
+  .pill:hover { background: var(--bg-secondary); }
+  .pill.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  .feel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 2rem; }
+  .feel-btn {
+    border: 0.5px solid var(--border); border-radius: var(--radius);
+    padding: .85rem .5rem; font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; background: var(--bg); transition: all .12s; text-align: center;
+  }
+  .feel-btn:hover { background: var(--bg-secondary); }
+  .feel-btn.on { border: 1.5px solid var(--text); color: var(--text); font-weight: 500; }
+
+  .top-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; }
+  .prog-track { flex: 1; height: 1px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width .4s; }
+  .prog-num { font-size: 12px; color: var(--text-tertiary); min-width: 40px; text-align: right; }
+
+  .dot-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1.75rem; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-hover); transition: background .25s; }
+  .dot.done { background: var(--text); }
+
+  .layer-tag { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: .5rem; display: block; }
+  .q-text { font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.45; margin-bottom: .75rem; }
+  .q-hint {
+    font-size: 13px; color: var(--text-tertiary); line-height: 1.65;
+    border-left: 1.5px solid var(--border-hover); padding-left: 12px; margin-bottom: 1.25rem;
+  }
+  textarea {
+    width: 100%; min-height: 120px; resize: vertical;
+    font-family: inherit; font-size: 15px; line-height: 1.7;
+    color: var(--text); background: var(--bg-secondary);
+    border: 0.5px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; outline: none; transition: border-color .15s;
+  }
+  textarea:focus { border-color: var(--border-hover); }
+  textarea::placeholder { color: var(--text-tertiary); }
+
+  .nav-row { display: flex; gap: 10px; margin-top: 1.5rem; align-items: center; }
+  .back-btn {
+    background: transparent; border: 0.5px solid var(--border-hover);
+    color: var(--text-secondary); padding: 12px 22px;
+    border-radius: var(--radius); font-size: 14px; cursor: pointer;
+  }
+  .back-btn:hover { background: var(--bg-secondary); }
+  .back-btn:disabled { opacity: .3; cursor: default; }
+  .next-btn {
+    background: var(--text); color: var(--bg); border: none;
+    padding: 13px 28px; border-radius: var(--radius); font-size: 14px;
+    font-weight: 500; cursor: pointer; transition: opacity .15s; margin-left: auto;
+  }
+  .next-btn:hover { opacity: .8; }
+
+  .insight-block { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
+  .insight-eyebrow { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: .75rem; }
+  .insight-title { font-size: 18px; font-weight: 500; color: var(--text); line-height: 1.45; margin-bottom: .5rem; }
+  .insight-body { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+
+  .answer-list { margin-bottom: 2rem; }
+  .a-item { border-bottom: 0.5px solid var(--border); padding: 1rem 0; }
+  .a-item:last-child { border-bottom: none; }
+  .a-q { font-size: 12px; color: var(--text-tertiary); margin-bottom: .4rem; line-height: 1.5; }
+  .a-a { font-size: 15px; color: var(--text); line-height: 1.65; font-style: italic; }
+  .a-empty { font-size: 13px; color: var(--text-tertiary); }
+
+  .bottom-mark { margin-top: auto; padding-top: 2.5rem; }
+  .bottom-mark-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .bottom-mark-tag { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
+  .bottom-mark-tag em { font-style: normal; color: var(--text-secondary); }
+
+  @media (max-width: 400px) {
+    .big-title { font-size: 26px; }
+    .q-text { font-size: 20px; }
+    .feel-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="s-intro" class="screen active">
+  <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
+  <h1 class="big-title">It starts with<br>a question.</h1>
+  <p class="sub">Tell us who you are and how life feels. Sit with questions built for you. Write what's actually true. See what it reveals.</p>
+  <button class="primary-btn" onclick="go('s-who')">Begin →</button>
+  <div class="bottom-mark">
+    <div class="bottom-mark-name">Re.</div>
+    <div class="bottom-mark-tag">Free. No accounts. Nothing stored.</div>
+  </div>
+</div>
+
+<div id="s-who" class="screen">
+  <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
+  <p class="step-label">1 of 3 — who you are</p>
+  <h2 class="big-title">Pick the one that fits right now.</h2>
+  <div class="who-grid">
+    <div class="who-card" data-who="kid" onclick="pickWho(this)">
+      <div class="who-icon">🌱</div>
+      <div class="who-name">Young &amp; finding out</div>
+      <div class="who-desc">Under 18, still figuring it out</div>
+    </div>
+    <div class="who-card" data-who="young" onclick="pickWho(this)">
+      <div class="who-icon">🔥</div>
+      <div class="who-name">Young adult</div>
+      <div class="who-desc">18–25, building, unsure, hungry</div>
+    </div>
+    <div class="who-card" data-who="adult" onclick="pickWho(this)">
+      <div class="who-icon">⚡</div>
+      <div class="who-name">In the thick of it</div>
+      <div class="who-desc">26–40, career, life, pressure</div>
+    </div>
+    <div class="who-card" data-who="mid" onclick="pickWho(this)">
+      <div class="who-icon">🕰</div>
+      <div class="who-name">Mid-life reckoning</div>
+      <div class="who-desc">40+, wondering if it's too late</div>
+    </div>
+  </div>
+  <button class="primary-btn" id="who-next" disabled onclick="go('s-life')">Next →</button>
+</div>
+
+<div id="s-life" class="screen">
+  <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
+  <p class="step-label">2 of 3 — your life</p>
+  <h2 class="big-title">What does your day actually look like?</h2>
+  <p class="sub" style="margin-bottom:1.5rem">Pick everything that's true right now.</p>
+  <p class="section-label">Most of my time goes to</p>
+  <div class="pill-row">
+    <div class="pill" data-v="screens" onclick="tog(this,'timeV')">screens &amp; content</div>
+    <div class="pill" data-v="work" onclick="tog(this,'timeV')">work or study</div>
+    <div class="pill" data-v="people" onclick="tog(this,'timeV')">people &amp; social</div>
+    <div class="pill" data-v="nothing" onclick="tog(this,'timeV')">nothing in particular</div>
+    <div class="pill" data-v="hustle" onclick="tog(this,'timeV')">building something</div>
+    <div class="pill" data-v="care" onclick="tog(this,'timeV')">caring for others</div>
+  </div>
+  <p class="section-label">I feel like I'm</p>
+  <div class="pill-row">
+    <div class="pill" data-v="drifting" onclick="tog(this,'modeV')">drifting</div>
+    <div class="pill" data-v="grinding" onclick="tog(this,'modeV')">grinding but lost</div>
+    <div class="pill" data-v="stuck" onclick="tog(this,'modeV')">stuck in place</div>
+    <div class="pill" data-v="moving" onclick="tog(this,'modeV')">moving forward</div>
+    <div class="pill" data-v="surviving" onclick="tog(this,'modeV')">just surviving</div>
+    <div class="pill" data-v="asleep" onclick="tog(this,'modeV')">sleepwalking</div>
+  </div>
+  <button class="primary-btn" onclick="go('s-feel')">Next →</button>
+</div>
+
+<div id="s-feel" class="screen">
+  <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
+  <p class="step-label">3 of 3 — underneath it all</p>
+  <h2 class="big-title">What's actually there?</h2>
+  <p class="sub">Pick up to three. The honest ones sting a little.</p>
+  <div class="feel-grid">
+    <div class="feel-btn" data-v="restless" onclick="togFeel(this)">Restless</div>
+    <div class="feel-btn" data-v="numb" onclick="togFeel(this)">Numb</div>
+    <div class="feel-btn" data-v="behind" onclick="togFeel(this)">Behind everyone</div>
+    <div class="feel-btn" data-v="wasted" onclick="togFeel(this)">Wasted days</div>
+    <div class="feel-btn" data-v="unseen" onclick="togFeel(this)">Unseen</div>
+    <div class="feel-btn" data-v="fear" onclick="togFeel(this)">Afraid to try</div>
+    <div class="feel-btn" data-v="potential" onclick="togFeel(this)">More in me</div>
+    <div class="feel-btn" data-v="purpose" onclick="togFeel(this)">No real purpose</div>
+    <div class="feel-btn" data-v="okay" onclick="togFeel(this)">Actually okay</div>
+  </div>
+  <button class="primary-btn" onclick="buildAndGo()">Open my eyes →</button>
+</div>
+
+<div id="s-questions" class="screen">
+  <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
+  <div class="top-bar">
+    <span id="q-layer-top" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);min-width:64px;"></span>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <span class="prog-num" id="prog-num"></span>
+  </div>
+  <div class="dot-row" id="dot-row"></div>
+  <span class="layer-tag" id="q-layer-name"></span>
+  <p class="q-text" id="q-text"></p>
+  <p class="q-hint" id="q-hint"></p>
+  <textarea id="q-answer" placeholder="Write what's actually true for you…"></textarea>
+  <div class="nav-row">
+    <button class="back-btn" id="q-back" onclick="qPrev()" disabled>Back</button>
+    <button class="next-btn" id="q-next" onclick="qNext()">Next →</button>
+  </div>
+</div>
+
+<div id="s-end" class="screen">
+  <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
+  <h2 class="big-title" style="margin-bottom:.5rem">Now sit with it.</h2>
+  <p style="font-size:14px;color:var(--text-tertiary);margin-bottom:1.75rem">You made it through all of them.</p>
+  <div class="insight-block">
+    <p class="insight-eyebrow">What this reveals</p>
+    <p class="insight-title" id="insight-title"></p>
+    <p class="insight-body" id="insight-body"></p>
+  </div>
+  <p style="font-size:14px;color:var(--text-secondary);line-height:1.75;margin-bottom:2rem" id="end-close"></p>
+  <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:.75rem">Your answers</p>
+  <div class="answer-list" id="answer-list"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="ghost-btn" onclick="restartAll()">Restart</button>
+  </div>
+  <div class="bottom-mark">
+    <div class="bottom-mark-name">Re.</div>
+    <div class="bottom-mark-tag">Made to <em>Re-make</em> minds.</div>
+  </div>
+</div>
+
+</div>
+<script>
+const S={who:'',timeV:[],modeV:[],feel:[],qs:[],qi:0,answers:[]};
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function pickWho(el){document.querySelectorAll('.who-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');S.who=el.dataset.who;document.getElementById('who-next').disabled=false;}
+function tog(el,g){el.classList.toggle('on');const v=el.dataset.v;S[g].includes(v)?S[g]=S[g].filter(x=>x!==v):S[g].push(v);}
+function togFeel(el){if(el.classList.contains('on')){el.classList.remove('on');S.feel=S.feel.filter(x=>x!==el.dataset.v);}else{if(S.feel.length>=3)return;el.classList.add('on');S.feel.push(el.dataset.v);}}
+const Q={
+  kid:{
+    mirror:[{q:"What did you actually do today — hour by hour?",h:"Just see yourself clearly. No judgment yet."},{q:"If someone filmed your whole day and showed it to you, would you feel proud or embarrassed?",h:"The answer you give first, before you think about it, is the true one."},{q:"What's the last thing you learned that genuinely surprised you?",h:"Not something you were told. Something that actually landed."},{q:"When's the last time you did something hard — and finished it?",h:"Hard means it cost you something to complete it."}],
+    world:[{q:"Do you know what most kids your age are doing right now — not here, but in the poorest places on Earth?",h:"Your reality is not the default. Most people never realise this."},{q:"Do you think the life you have — food, phone, school — is normal for most kids?",h:"Think about this honestly before you answer."},{q:"If you were born somewhere else, with nothing — what would you have today?",h:"Not what you'd want. What you'd actually have."}],
+    time:[{q:"How many hours of your week honestly go to screens and content?",h:"Time doesn't feel real until it's gone. That's the trap."},{q:"If you spent those same hours on one skill every week for a year, what could you actually do by the end?",h:"Pick something real. Do the math."},{q:"Imagine yourself at 25. Is he someone worth becoming?",h:"Be specific. What does he look like? What can he do?"}],
+    identity:[{q:"Do your friends actually think you're cool — or do they just say it?",h:"There's a difference. You know which one it is."},{q:"What do you think is actually cool? Not what they say — what do you believe?",h:"Your answer, not the group's."},{q:"Is there anything you want to be genuinely good at — just for yourself, no one watching?",h:"The thing you think about but don't say out loud."},{q:"What's one thing you're quietly afraid you'll never be good enough to do?",h:"This one takes courage to answer honestly."}],
+    legacy:[{q:"Did you know most people live their whole life and never find out what they were actually capable of?",h:"This is the one that stays with you."},{q:"What do you think it feels like to be 60 and realise you wasted your best years?",h:"Sit with this. Don't rush past it."},{q:"If you could be known for one thing when you grow up — what would you want it to be?",h:"Not what sounds good. What actually matters to you."},{q:"What's stopping you from starting that — right now, today?",h:"Be specific. 'I don't know how' is not an answer."}]
+  },
+  young:{
+    mirror:[{q:"What did you spend the last 72 hours on — be specific?",h:"No judgment yet. Just see yourself as you actually are."},{q:"If a version of you from 5 years ago could see today, what would they think?",h:"Would they be proud? Confused? Disappointed?"},{q:"What's the hardest thing you've done in the last month?",h:"Hard means it cost you something real."},{q:"What skill have you actually improved in the last year?",h:"Not what you meant to do. What you actually did."}],
+    world:[{q:"Do you understand how small the window of your 20s actually is?",h:"Your reality is not the default. Most people never realise this."},{q:"Do you know what your peers are doing in countries where failure isn't an option?",h:"Compare your urgency to theirs."},{q:"What would you be doing right now if you had been born into real scarcity?",h:"Not what you'd want. What you'd actually be doing to survive."}],
+    time:[{q:"How much of your week is genuinely yours — not obligation, not distraction?",h:"Time doesn't feel real until it's gone. That's the trap."},{q:"If you kept living exactly like this for 5 more years, what would your life look like?",h:"Don't soften the answer. Project forward honestly."},{q:"What are you spending hours on that you'll never get back and won't remember?",h:"Name it specifically."}],
+    identity:[{q:"What do you actually believe in — not what you say, but what you act on?",h:"Your actions are your real beliefs. Everything else is just talk."},{q:"Who are you when nobody is watching and nothing is expected of you?",h:"This is closer to the truth than the version you show people."},{q:"What would you do if you knew for certain you couldn't fail?",h:"The answer tells you what you actually want."},{q:"What's the gap between the person you present and the person you actually are?",h:"Everyone has one. The question is how wide yours is."}],
+    legacy:[{q:"What do you want to have built, created, or changed by the time you're 40?",h:"This is the one that stays with you."},{q:"What would the person you're becoming look like — and are you proud of them?",h:"You're building that person right now, whether you're thinking about it or not."},{q:"If you died at 35 having never changed course, how would you feel about your life?",h:"Be brutally honest. No one is reading this but you."}]
+  },
+  adult:{
+    mirror:[{q:"What did you do last week that you're genuinely proud of?",h:"No judgment yet. Just see yourself as you actually are."},{q:"What would you do differently if you knew no one was watching and no one was judging?",h:"The answer reveals what you actually want versus what you perform."},{q:"When did you last do something that scared you in a good way?",h:"Not anxiety. The good kind — the kind that means you're alive."},{q:"What's one thing you keep putting off that you know actually matters?",h:"You already know what it is."}],
+    world:[{q:"Do you understand what most of humanity would give to have the choices you have?",h:"Your reality is not the default. Most people never realise this."},{q:"What do people who've lost everything wish they'd done when they still had time?",h:"They've written the books. The question is whether you're reading them."},{q:"What's the biggest privilege in your life that you treat like it's ordinary?",h:"Name it specifically. Don't let it stay vague."}],
+    time:[{q:"How many hours a week do you spend on things that will matter in 10 years?",h:"Time doesn't feel real until it's gone. That's the trap."},{q:"If your time usage was a pie chart, what would the biggest slice be — and is it what you'd choose?",h:"What you spend time on is what you're choosing, whether you realise it or not."},{q:"What's the most valuable thing you could do with a free hour that you never seem to do?",h:"Name it. Then ask why you keep not doing it."}],
+    identity:[{q:"What do you actually believe in — not what you say, but what you act on?",h:"Your actions are your real beliefs. Everything else is just talk."},{q:"Who are you when nobody is watching and nothing is expected of you?",h:"This is closer to the truth than the version you show people."},{q:"What would you do if you knew for certain you couldn't fail?",h:"The answer tells you what you actually want."},{q:"What's the gap between the person you present and the person you actually are?",h:"Everyone has one. The question is how wide yours is."}],
+    legacy:[{q:"What do you want your kids, or the people who know you, to remember about how you lived?",h:"This is the one that stays with you."},{q:"Is the legacy you're building the one you actually chose — or the one that just happened?",h:"Most people's lives are the second one."},{q:"What would you regret not doing if you found out you had 5 years left?",h:"Then ask: why aren't you doing it now?"}]
+  },
+  mid:{
+    mirror:[{q:"If your life so far were a story, what would the theme be?",h:"No judgment yet. Just see yourself as you actually are."},{q:"What's the decision you made in your 20s that shaped everything after?",h:"Not necessarily bad. Just the hinge point."},{q:"What have you stopped believing in — and what have you started believing in?",h:"Beliefs change. Most people don't notice when theirs do."},{q:"What would you tell your 25-year-old self, if they'd actually listen?",h:"The thing you wish someone had told you."}],
+    world:[{q:"What have you been taking for granted for decades that other people never had?",h:"Your reality is not the default. Most people never realise this."},{q:"Do you understand how rare it is to still have the energy and time you have right now?",h:"It feels like it'll always be there. It won't."},{q:"What are people who are dying wishing they had done — that you still can?",h:"This is not rhetorical. They've written the lists."}],
+    time:[{q:"How many years do you think you have at full energy — not slowing down, full capacity?",h:"Time doesn't feel real until it's gone. That's the trap."},{q:"What would you do this year if you knew you only had 10 more years at this level?",h:"Not someday. This year. What specifically?"},{q:"What's the one thing you keep postponing that you know, honestly, you're running out of time for?",h:"Name it. Say it out loud inside your head."}],
+    identity:[{q:"What do you actually believe in — not what you say, but what you act on?",h:"Your actions are your real beliefs. Everything else is just talk."},{q:"Who are you when nobody is watching and nothing is expected of you?",h:"This is closer to the truth than the version you show people."},{q:"What would you do if you knew for certain you couldn't fail?",h:"The answer tells you what you actually want."},{q:"What's the gap between the person you present and the person you actually are?",h:"Everyone has one. The question is how wide yours is."}],
+    legacy:[{q:"What's the chapter of your life you haven't written yet — but still could?",h:"This is the one that stays with you."},{q:"What do you want to be true about you when it ends?",h:"Not what you want people to say. What do you want to be true."},{q:"What's the single most important thing you want to leave behind — and are you working toward it?",h:"If the answer is no, ask why not."}]
+  }
+};
+const insights={
+  restless:["You're not broken — you're overdue.","The restlessness you feel isn't anxiety. It's unused capacity looking for an exit. Most people suppress it until it disappears. You sat with it instead."],
+  numb:["Numbness is a choice that feels like a state.","You've been managing something instead of moving through it. The things that made you feel alive haven't gone — they've been quietly waiting under the noise you've filled the space with."],
+  behind:["The race you're losing isn't real.","Comparison is a form of self-abandonment. The people ahead in your mind are ahead in someone else's story — not yours. Your timeline is the only one that matters."],
+  wasted:["The feeling of waste is a compass.","If wasted days bother you, it means you haven't stopped caring. The person who stops caring doesn't feel the waste. You still do — use that."],
+  unseen:["You're seen when you stop hiding.","Most people wait to be found. The real version of you won't emerge from waiting — it emerges from deciding to stop protecting it."],
+  fear:["The fear is the exact size of what you want.","Fears don't show up around things that don't matter. The size of your fear is a direct measure of what you actually want. That's useful information."],
+  potential:["More in you means it's not done.","The people who die with untapped potential aren't the ones who tried and failed. They're the ones who kept waiting for the right time. You already know there's more."],
+  purpose:["Purpose isn't found. It's built.","It doesn't arrive whole. It gets constructed through repeated choices to care about something bigger than your own comfort. The question was never what your purpose is. It's what you're willing to build it toward."],
+  okay:["Okay is a plateau, not a destination.","Okay is where most people settle. But you're here — which means something in you suspects there's a different altitude available. You haven't decided yet whether to go for it."]
+};
+const closings={
+  kid:"The fact that you did this means you're already ahead of most. Most people never ask themselves anything. You just did.",
+  young:"You have more time than you feel. And less than you think. That tension is the most productive place a human can live.",
+  adult:"The questions don't expire. The window to act on them does — but it's still open. Narrower than it was. Still open.",
+  mid:"It's not too late. That phrase sounds like comfort. It's actually a challenge. The only people it doesn't apply to are the ones who stop moving."
+};
+function buildQuestions(){
+  const w=S.who||'young';const b=Q[w];const qs=[];
+  b.mirror.forEach(o=>qs.push({...o,layer:'Mirror'}));
+  b.world.forEach(o=>qs.push({...o,layer:'The world'}));
+  b.time.forEach(o=>qs.push({...o,layer:'Time'}));
+  b.identity.forEach(o=>qs.push({...o,layer:'Identity'}));
+  b.legacy.forEach(o=>qs.push({...o,layer:'Legacy'}));
+  return qs;
+}
+function buildDots(n){const r=document.getElementById('dot-row');r.innerHTML='';for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.id='dot-'+i;r.appendChild(d);}}
+function saveAns(){S.answers[S.qi]=document.getElementById('q-answer').value.trim();}
+function renderQ(){
+  const it=S.qs[S.qi];const tot=S.qs.length;
+  document.getElementById('q-layer-top').textContent=it.layer;
+  document.getElementById('q-layer-name').textContent=it.layer;
+  document.getElementById('q-text').textContent=it.q;
+  document.getElementById('q-hint').textContent=it.h;
+  document.getElementById('q-answer').value=S.answers[S.qi]||'';
+  document.getElementById('prog-fill').style.width=Math.round((S.qi+1)/tot*100)+'%';
+  document.getElementById('prog-num').textContent=(S.qi+1)+' / '+tot;
+  document.getElementById('q-back').disabled=S.qi===0;
+  document.getElementById('q-next').textContent=S.qi===tot-1?'See what this means →':'Next →';
+  for(let i=0;i<tot;i++){const d=document.getElementById('dot-'+i);if(d)d.className='dot'+(i<=S.qi?' done':'');}
+  window.scrollTo(0,0);
+}
+function buildAndGo(){S.qs=buildQuestions();S.answers=new Array(S.qs.length).fill('');S.qi=0;buildDots(S.qs.length);renderQ();go('s-questions');}
+function qNext(){saveAns();if(S.qi<S.qs.length-1){S.qi++;renderQ();}else{buildEnd();go('s-end');}}
+function qPrev(){saveAns();if(S.qi>0){S.qi--;renderQ();}}
+function buildEnd(){
+  const feel=S.feel[0]||'potential';
+  const ins=insights[feel]||insights.potential;
+  document.getElementById('insight-title').textContent=ins[0];
+  document.getElementById('insight-body').textContent=ins[1];
+  document.getElementById('end-close').textContent=closings[S.who]||closings.young;
+  const list=document.getElementById('answer-list');list.innerHTML='';
+  S.qs.forEach((it,i)=>{
+    const a=S.answers[i];const div=document.createElement('div');div.className='a-item';
+    div.innerHTML='<p class="a-q">'+it.q+'</p><p class="'+(a?'a-a':'a-empty')+'">'+(a||'No answer written')+'</p>';
+    list.appendChild(div);
+  });
+}
+function restartAll(){
+  S.who='';S.timeV=[];S.modeV=[];S.feel=[];S.qs=[];S.qi=0;S.answers=[];
+  document.querySelectorAll('.who-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('who-next').disabled=true;
+  go('s-intro');
+}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));}
+</script>
+</body>
+</html>
