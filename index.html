@@ -224,7 +224,9 @@
     <div class="pill" data-v="nothing" onclick="tog(this,'timeV')">nothing in particular</div>
     <div class="pill" data-v="hustle" onclick="tog(this,'timeV')">building something</div>
     <div class="pill" data-v="care" onclick="tog(this,'timeV')">caring for others</div>
+    <div class="pill" data-v="other-time" onclick="togOther(this,'timeV','other-time-input')">Other (describe)</div>
   </div>
+  <input type="text" id="other-time-input" placeholder="Describe…" oninput="S.otherTime=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;outline:none;margin-bottom:1rem;transition:border-color .15s">
   <p class="section-label">I feel like I'm</p>
   <div class="pill-row">
     <div class="pill" data-v="drifting" onclick="tog(this,'modeV')">drifting</div>
@@ -233,7 +235,9 @@
     <div class="pill" data-v="moving" onclick="tog(this,'modeV')">moving forward</div>
     <div class="pill" data-v="surviving" onclick="tog(this,'modeV')">just surviving</div>
     <div class="pill" data-v="asleep" onclick="tog(this,'modeV')">sleepwalking</div>
+    <div class="pill" data-v="other-mode" onclick="togOther(this,'modeV','other-mode-input')">Other (describe)</div>
   </div>
+  <input type="text" id="other-mode-input" placeholder="Describe…" oninput="S.otherMode=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;outline:none;margin-bottom:1rem;transition:border-color .15s">
   <div class="nav-row" style="margin-top:1.5rem">
     <button class="back-btn" onclick="go('s-who')">Back</button>
     <button class="primary-btn" onclick="go('s-feel')" style="margin-left:auto">Next →</button>
@@ -255,7 +259,15 @@
     <div class="feel-btn" data-v="potential" onclick="togFeel(this)">More in me</div>
     <div class="feel-btn" data-v="purpose" onclick="togFeel(this)">No real purpose</div>
     <div class="feel-btn" data-v="okay" onclick="togFeel(this)">Actually okay</div>
+    <div class="feel-btn" data-v="content" onclick="togFeel(this)">Content, genuinely</div>
+    <div class="feel-btn" data-v="hopeless" onclick="togFeel(this)">Insufficient &amp; hopeless</div>
+    <div class="feel-btn" data-v="happy" onclick="togFeel(this)">Happy (on the surface)</div>
+    <div class="feel-btn" data-v="angry" onclick="togFeel(this)">Angry, at what I'm not sure</div>
+    <div class="feel-btn" data-v="grief" onclick="togFeel(this)">Grieving something</div>
+    <div class="feel-btn" data-v="waiting" onclick="togFeel(this)">Waiting for life to start</div>
+    <div class="feel-btn" data-v="other-feel" onclick="togFeel(this)">Other (describe)</div>
   </div>
+  <input type="text" id="other-feel-input" placeholder="Describe what's actually there…" oninput="S.otherFeel=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;outline:none;margin-bottom:1rem;transition:border-color .15s">
   <div class="nav-row" style="margin-top:1.5rem">
     <button class="back-btn" onclick="go('s-life')">Back</button>
     <button class="primary-btn" onclick="buildAndGo()" style="margin-left:auto">Open my eyes →</button>
@@ -318,11 +330,39 @@
 
 </div>
 <script>
-const S={who:'',timeV:[],modeV:[],feel:[],qs:[],qi:0,answers:[]};
+const S={who:'',timeV:[],modeV:[],feel:[],qs:[],qi:0,answers:[],otherTime:'',otherMode:'',otherFeel:''};
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
 function pickWho(el){document.querySelectorAll('.who-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');S.who=el.dataset.who;document.getElementById('who-next').disabled=false;}
 function tog(el,g){el.classList.toggle('on');const v=el.dataset.v;S[g].includes(v)?S[g]=S[g].filter(x=>x!==v):S[g].push(v);}
-function togFeel(el){if(el.classList.contains('on')){el.classList.remove('on');S.feel=S.feel.filter(x=>x!==el.dataset.v);}else{if(S.feel.length>=3)return;el.classList.add('on');S.feel.push(el.dataset.v);}}
+function togOther(el,group,inputId){
+  const input=document.getElementById(inputId);
+  const v=el.dataset.v;
+  if(el.classList.contains('on')){
+    el.classList.remove('on');
+    S[group]=S[group].filter(x=>x!==v);
+    input.style.display='none';
+    input.value='';
+  } else {
+    el.classList.add('on');
+    S[group].push(v);
+    input.style.display='block';
+    setTimeout(()=>input.focus(),50);
+  }
+}
+function togFeel(el){
+  const v=el.dataset.v;
+  const otherInput=document.getElementById('other-feel-input');
+  if(el.classList.contains('on')){
+    el.classList.remove('on');
+    S.feel=S.feel.filter(x=>x!==v);
+    if(v==='other-feel'){otherInput.style.display='none';otherInput.value='';S.otherFeel='';}
+  } else {
+    if(S.feel.length>=3)return;
+    el.classList.add('on');
+    S.feel.push(v);
+    if(v==='other-feel'){otherInput.style.display='block';setTimeout(()=>otherInput.focus(),50);}
+  }
+}
 const Q={
   kid:{
     mirror:[{q:"What did you actually do today — hour by hour?",h:"Just see yourself clearly. No judgment yet."},{q:"If someone filmed your whole day and showed it to you, would you feel proud or embarrassed?",h:"The answer you give first, before you think about it, is the true one."},{q:"What's the last thing you learned that genuinely surprised you?",h:"Not something you were told. Something that actually landed."},{q:"When's the last time you did something hard — and finished it?",h:"Hard means it cost you something to complete it."}],
@@ -362,7 +402,14 @@ const insights={
   fear:["The fear is the exact size of what you want.","Fears don't show up around things that don't matter. The size of your fear is a direct measure of what you actually want. That's useful information."],
   potential:["More in you means it's not done.","The people who die with untapped potential aren't the ones who tried and failed. They're the ones who kept waiting for the right time. You already know there's more."],
   purpose:["Purpose isn't found. It's built.","It doesn't arrive whole. It gets constructed through repeated choices to care about something bigger than your own comfort. The question was never what your purpose is. It's what you're willing to build it toward."],
-  okay:["Okay is a plateau, not a destination.","Okay is where most people settle. But you're here — which means something in you suspects there's a different altitude available. You haven't decided yet whether to go for it."]
+  okay:["Okay is a plateau, not a destination.","Okay is where most people settle. But you're here — which means something in you suspects there's a different altitude available. You haven't decided yet whether to go for it."],
+  content:["Contentment is rare. Don't mistake it for settling.","Most people never get here. The question isn't whether to be grateful — it's whether contentment is the ceiling or just the floor you're building from."],
+  hopeless:["Hopelessness is a conclusion drawn too early.","It feels like a fact. It isn't. It's what happens when the gap between where you are and where you think you should be becomes too large to hold. The gap is real. The permanence isn't."],
+  happy:["Surface happiness is its own kind of loneliness.","There's a version of happiness that's real, and a version that's a performance — even to yourself. If you picked this one, some part of you already knows which kind it is."],
+  angry:["Anger without a target is direction without a map.","Something isn't right — you can feel it. The anger is information. The question is whether you'll let it point somewhere useful, or keep burning it as fuel that goes nowhere."],
+  grief:["Grief doesn't only follow loss. Sometimes it follows realisation.","You might be grieving a person, a version of yourself, a life that didn't happen, or a future that no longer feels certain. All of it is real. None of it means you're done."],
+  waiting:["Waiting is a decision you keep making every day.","Life doesn't have a starting pistol. The waiting feels like preparation — it isn't. It's the thing that happens instead of living. The start you're waiting for is already late."],
+  'other-feel':["You named something the list didn't have.","That matters. Most people pick the nearest option and move on. You didn't. Whatever you described — sit with whether it's new, or whether it's something you've been carrying for a long time without a word for it."]
 };
 const closings={
   kid:"The fact that you did this means you're already ahead of most. Most people never ask themselves anything. You just did.",
@@ -486,10 +533,11 @@ function goDeeper(){
   window.open('https://claude.ai/new?q='+encoded,'_blank');
 }
 function restartAll(){
-  S.who='';S.timeV=[];S.modeV=[];S.feel=[];S.qs=[];S.qi=0;S.answers=[];
+  S.who='';S.timeV=[];S.modeV=[];S.feel=[];S.qs=[];S.qi=0;S.answers=[];S.otherTime='';S.otherMode='';S.otherFeel='';
   document.querySelectorAll('.who-card').forEach(c=>c.classList.remove('selected'));
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('on'));
+  ['other-time-input','other-mode-input','other-feel-input'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.value='';}});
   document.getElementById('who-next').disabled=true;
   go('s-intro');
 }
