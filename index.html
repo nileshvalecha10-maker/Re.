@@ -284,14 +284,28 @@
   <div class="mark"><div class="mark-name">Re.</div><div class="mark-tag">Made to <em>Re-make</em> minds.</div></div>
   <h2 class="big-title" style="margin-bottom:.5rem">Now sit with it.</h2>
   <p style="font-size:14px;color:var(--text-tertiary);margin-bottom:1.75rem">You made it through all of them.</p>
+
   <div class="insight-block">
     <p class="insight-eyebrow">What this reveals</p>
     <p class="insight-title" id="insight-title"></p>
     <p class="insight-body" id="insight-body"></p>
   </div>
+
+  <div class="insight-block" id="pattern-block" style="display:none">
+    <p class="insight-eyebrow">Pattern in your answers</p>
+    <p class="insight-body" id="pattern-body"></p>
+  </div>
+
+  <div class="insight-block" id="tension-block" style="display:none">
+    <p class="insight-eyebrow">The tension worth sitting with</p>
+    <p class="insight-body" id="tension-body"></p>
+  </div>
+
   <p style="font-size:14px;color:var(--text-secondary);line-height:1.75;margin-bottom:2rem" id="end-close"></p>
-  <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:.75rem">Your answers</p>
+
+  <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:.75rem">What you wrote</p>
   <div class="answer-list" id="answer-list"></div>
+
   <div style="display:flex;gap:10px;flex-wrap:wrap">
     <button class="ghost-btn" onclick="restartAll()">Restart</button>
     <button class="primary-btn" style="margin-top:0" onclick="goDeeper()">Go deeper ↗</button>
@@ -390,13 +404,80 @@ function buildEnd(){
   document.getElementById('insight-title').textContent=ins[0];
   document.getElementById('insight-body').textContent=ins[1];
   document.getElementById('end-close').textContent=closings[S.who]||closings.young;
+
+  // analyse actual written answers for patterns
+  const written=S.answers.filter(a=>a&&a.trim().length>0);
+  const allText=written.join(' ').toLowerCase();
+
+  // detect evasion: very short answers or lots of "no answer"
+  const avgLen=written.length?written.reduce((s,a)=>s+a.length,0)/written.length:0;
+  const skipped=S.answers.filter(a=>!a||a.trim().length===0).length;
+  const skippedPct=skipped/S.qs.length;
+
+  // detect honesty signals
+  const honestyWords=['don\'t know','not sure','nothing','never','i don\'t','i haven\'t','afraid','scared','fail','embarrassed','ashamed','wasted','stuck','lost','numb'];
+  const honestyHits=honestyWords.filter(w=>allText.includes(w)).length;
+
+  // detect avoidance / deflection
+  const deflectWords=['maybe','probably','i think','i guess','kind of','sort of','i would','i want to','someday','eventually','one day'];
+  const deflectHits=deflectWords.filter(w=>allText.includes(w)).length;
+
+  // detect people-facing answers vs self-facing
+  const peopleWords=['they','them','people','others','friends','family','everyone','my parents','society'];
+  const selfWords=['i feel','i am','i want','i need','i know','i don\'t','my mind','myself'];
+  const peopleFocus=peopleWords.filter(w=>allText.includes(w)).length;
+  const selfFocus=selfWords.filter(w=>allText.includes(w)).length;
+
+  let patternText='';
+  let tensionText='';
+
+  if(skippedPct>0.5){
+    patternText='More than half the questions got no answer. That\'s not nothing — skipping is its own kind of answer. The questions you avoided are probably the ones worth returning to.';
+  } else if(avgLen<25&&written.length>3){
+    patternText='Your answers are short. That can mean clarity — or it can mean you stopped just before the honest part. The one-line answers are worth expanding when you\'re alone.';
+  } else if(honestyHits>=3){
+    patternText='You used words like "nothing", "never", "don\'t know" more than once. That kind of honesty is rare. Most people dress their answers up. You didn\'t.';
+  } else if(deflectHits>=4){
+    patternText='A lot of your answers live in the future tense — "I would", "someday", "eventually". The gap between what you describe wanting and what you\'re actually doing is where the real question lives.';
+  } else if(peopleFocus>selfFocus+2){
+    patternText='Your answers lean outward — toward other people, what they think, what they do. The most important question in this set is probably the one that starts with just "I".';
+  } else if(written.length>=Math.floor(S.qs.length*0.75)){
+    patternText='You answered most of them. That takes something — most people tap out halfway. Whether the answers are fully honest is between you and the page.';
+  }
+
+  if(feel==='potential'&&deflectHits>=3){
+    tensionText='You said there\'s more in you — and your answers kept pushing the "more" into the future. That\'s the tension: knowing and not moving. It doesn\'t need a plan yet. It needs a decision.';
+  } else if(feel==='restless'&&peopleFocus>selfFocus){
+    tensionText='You\'re restless, but your answers keep looking outward. The thing pulling at you is probably not about other people. It\'s about something you haven\'t let yourself name yet.';
+  } else if(feel==='wasted'&&skippedPct>0.3){
+    tensionText='You said the days feel wasted — and skipped a third of the questions. That\'s not laziness. That\'s the same pattern. The question is whether you\'ll break it here, or carry it forward.';
+  } else if(feel==='fear'&&honestyHits>=2){
+    tensionText='You named fears honestly. Most people won\'t. The next step isn\'t courage — it\'s just doing the smallest possible version of the scary thing, once, to prove the fear was bigger than the reality.';
+  } else if(avgLen>80&&written.length>5){
+    tensionText='You wrote a lot. That\'s either real engagement or thinking out loud to avoid a conclusion. Read back your longest answer — somewhere in it is probably the thing you\'re circling.';
+  }
+
+  const pb=document.getElementById('pattern-block');
+  const tb=document.getElementById('tension-block');
+  if(patternText){document.getElementById('pattern-body').textContent=patternText;pb.style.display='block';}
+  else{pb.style.display='none';}
+  if(tensionText){document.getElementById('tension-body').textContent=tensionText;tb.style.display='block';}
+  else{tb.style.display='none';}
+
+  // render answers — only show written ones prominently, skipped ones dimmed
   const list=document.getElementById('answer-list');list.innerHTML='';
   S.qs.forEach((it,i)=>{
-    const a=S.answers[i];const div=document.createElement('div');div.className='a-item';
-    div.innerHTML='<p class="a-q">'+it.q+'</p><p class="'+(a?'a-a':'a-empty')+'">'+(a||'No answer written')+'</p>';
+    const a=S.answers[i];
+    if(!a||!a.trim()) return; // hide blank ones entirely
+    const div=document.createElement('div');div.className='a-item';
+    div.innerHTML='<p class="a-q">'+escHtml(it.q)+'</p><p class="a-a">'+escHtml(a)+'</p>';
     list.appendChild(div);
   });
+  if(list.children.length===0){
+    list.innerHTML='<p style="font-size:14px;color:var(--text-tertiary);padding:1rem 0">No answers written. The questions are still here whenever you\'re ready.</p>';
+  }
 }
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function goDeeper(){
   const feel=S.feel[0]||'potential';
   const answered=S.qs.map((q,i)=>S.answers[i]?q.q+' → '+S.answers[i]:null).filter(Boolean).slice(0,6).join('\n');
