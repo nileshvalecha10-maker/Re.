@@ -133,6 +133,8 @@
   }
   textarea:focus { border-color: var(--border-hover); }
   textarea::placeholder { color: var(--text-tertiary); }
+  .word-count { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; min-height: 18px; transition: color .2s; }
+  .word-count.warn { color: #e05a5a; }
 
   .nav-row { display: flex; gap: 10px; margin-top: 1.5rem; align-items: center; }
   .back-btn {
@@ -273,6 +275,11 @@
     <div class="feel-btn" data-v="angry" onclick="togFeel(this)">Angry, at what I'm not sure</div>
     <div class="feel-btn" data-v="grief" onclick="togFeel(this)">Grieving something</div>
     <div class="feel-btn" data-v="waiting" onclick="togFeel(this)">Waiting for life to start</div>
+    <div class="feel-btn" data-v="thriving" onclick="togFeel(this)">Genuinely thriving</div>
+    <div class="feel-btn" data-v="grateful" onclick="togFeel(this)">Grateful, deeply</div>
+    <div class="feel-btn" data-v="clarity" onclick="togFeel(this)">Clear for the first time</div>
+    <div class="feel-btn" data-v="momentum" onclick="togFeel(this)">On a good streak</div>
+    <div class="feel-btn" data-v="curious" onclick="togFeel(this)">Curious about life</div>
     <div class="feel-btn" data-v="other-feel" onclick="togFeel(this)">Other (describe)</div>
   </div>
   <input type="text" id="other-feel-input" placeholder="Describe what's actually there…" oninput="S.otherFeel=this.value" style="display:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg-secondary);border:0.5px solid var(--border-hover);border-radius:var(--radius);padding:12px 14px;outline:none;margin-top:-0.5rem;margin-bottom:1rem;transition:border-color .15s;box-sizing:border-box;">
@@ -293,7 +300,8 @@
   <span class="layer-tag" id="q-layer-name"></span>
   <p class="q-text" id="q-text"></p>
   <p class="q-hint" id="q-hint"></p>
-  <textarea id="q-answer" placeholder="Write what's actually true for you…"></textarea>
+  <textarea id="q-answer" placeholder="Write what's actually true for you…" oninput="onAnswerInput()"></textarea>
+  <div class="word-count" id="word-count"></div>
   <div class="nav-row">
     <button class="back-btn" id="q-back" onclick="qPrev()" disabled>Back</button>
     <button class="next-btn" id="q-next" onclick="qNext()">Next →</button>
@@ -418,6 +426,11 @@ const insights={
   angry:["Anger without a target is direction without a map.","Something isn't right — you can feel it. The anger is information. The question is whether you'll let it point somewhere useful, or keep burning it as fuel that goes nowhere."],
   grief:["Grief doesn't only follow loss. Sometimes it follows realisation.","You might be grieving a person, a version of yourself, a life that didn't happen, or a future that no longer feels certain. All of it is real. None of it means you're done."],
   waiting:["Waiting is a decision you keep making every day.","Life doesn't have a starting pistol. The waiting feels like preparation — it isn't. It's the thing that happens instead of living. The start you're waiting for is already late."],
+  thriving:["Thriving is the beginning, not the destination.","You're in a rare place. Most people never get here, and the ones who do often let it plateau. The question now isn't how to protect it — it's what you build from it."],
+  grateful:["Gratitude without direction is just relief.","You feel it deeply — that's real and it matters. The question underneath is whether the gratitude is moving you forward, or quietly making it easier to stay still."],
+  clarity:["Clarity is only useful if you act before it fades.","It always fades. The window between seeing things clearly and slipping back into noise is smaller than it feels. What you do in the next few days matters more than it seems."],
+  momentum:["A good streak is a foundation, not a finish line.","You're moving — that's everything. The only thing that kills momentum is stopping to admire it. Keep going. Reflect later."],
+  curious:["Curiosity is the most underrated form of courage.","Most people stop being genuinely curious about life somewhere in their 20s. If you still are, that's not small. It means something in you is still open. Don't let that close."],
   'other-feel':["You named something the list didn't have.","That matters. Most people pick the nearest option and move on. You didn't. Whatever you described — sit with whether it's new, or whether it's something you've been carrying for a long time without a word for it."]
 };
 const closings={
@@ -436,6 +449,17 @@ function buildQuestions(){
   return qs;
 }
 function buildDots(n){const r=document.getElementById('dot-row');r.innerHTML='';for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';d.id='dot-'+i;r.appendChild(d);}}
+function wordCount(s){return s.trim()===''?0:s.trim().split(/\s+/).filter(w=>w.length>0).length;}
+function onAnswerInput(){
+  const val=document.getElementById('q-answer').value;
+  const wc=wordCount(val);
+  const MIN=20;
+  const counter=document.getElementById('word-count');
+  const btn=document.getElementById('q-next');
+  if(wc===0){counter.textContent='';btn.disabled=true;}
+  else if(wc<MIN){counter.textContent=(MIN-wc)+' more word'+(MIN-wc===1?'':'s')+' to continue';counter.classList.add('warn');btn.disabled=true;}
+  else{counter.textContent=wc+' words';counter.classList.remove('warn');btn.disabled=false;}
+}
 function saveAns(){S.answers[S.qi]=document.getElementById('q-answer').value.trim();}
 function renderQ(){
   const it=S.qs[S.qi];const tot=S.qs.length;
@@ -443,12 +467,20 @@ function renderQ(){
   document.getElementById('q-layer-name').textContent=it.layer;
   document.getElementById('q-text').textContent=it.q;
   document.getElementById('q-hint').textContent=it.h;
-  document.getElementById('q-answer').value=S.answers[S.qi]||'';
+  const existing=S.answers[S.qi]||'';
+  document.getElementById('q-answer').value=existing;
   document.getElementById('prog-fill').style.width=Math.round((S.qi+1)/tot*100)+'%';
   document.getElementById('prog-num').textContent=(S.qi+1)+' / '+tot;
   document.getElementById('q-back').disabled=S.qi===0;
   document.getElementById('q-next').textContent=S.qi===tot-1?'See what this means →':'Next →';
   for(let i=0;i<tot;i++){const d=document.getElementById('dot-'+i);if(d)d.className='dot'+(i<=S.qi?' done':'');}
+  // reset word count display
+  const counter=document.getElementById('word-count');
+  const btn=document.getElementById('q-next');
+  const wc=wordCount(existing);
+  if(wc>=20){counter.textContent=wc+' words';counter.classList.remove('warn');btn.disabled=false;}
+  else if(wc>0){counter.textContent=(20-wc)+' more word'+(20-wc===1?'':'s')+' to continue';counter.classList.add('warn');btn.disabled=true;}
+  else{counter.textContent='';btn.disabled=true;}
   window.scrollTo(0,0);
 }
 function buildAndGo(){S.qs=buildQuestions();S.answers=new Array(S.qs.length).fill('');S.qi=0;buildDots(S.qs.length);renderQ();go('s-questions');}
